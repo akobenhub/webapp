@@ -1,0 +1,115 @@
+name: Website Deployment to Shared Hosting for Akoben Hub
+
+# This workflow deploys the Vite/React (TanStack Start) website to shared hosting via FTPS
+# It builds the website with the production API URL and deploys to /public_html
+# No SSH access required - uses FTPS (FTP over SSL/TLS) for secure transfer
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'website/**'
+      - '.github/workflows/website.yml'
+  workflow_dispatch: # Allow manual trigger from GitHub Actions UI
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      # Step 1: Checkout the repository code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: website/package-lock.json
+
+      # Step 3: Install dependencies
+      - name: Install npm dependencies
+        run: |
+          cd website
+          npm ci
+
+      # Step 4: Build website with production API URL
+      # The API URL is read from VITE_API_URL environment variable
+      # Vite automatically loads .env.production, but env vars take precedence
+      - name: Build website for Akoben Hub
+        run: |
+          cd website
+          echo "Building with VITE_API_URL: $VITE_API_URL"
+          npm run build
+        env:
+          NODE_ENV: production
+          # VITE_API_URL will be used by Vite to replace import.meta.env.VITE_API_URL
+          VITE_API_URL: ${{ secrets.FRONTEND_API_URL_AKOBEN || 'https://api.akoben.org/api' }}
+          # VITE_SCHOOLDOCS_URL: ${{ secrets.FRONTEND_SCHOOLDOCS_URL_TILLY || 'https://schooldocs.kdgsolution.com' }}
+
+      # Step 5: Verify API URL in built files
+      - name: Verify API URL in build
+        run: |
+          cd website/dist/client
+          echo "Checking for API URL in built files..."
+          PROD_URL="${{ secrets.FRONTEND_API_URL_AKOBEN || 'https://api.akoben.org/api' }}"
+
+          # Check for localhost (should NOT be found)
+          if grep -r "localhost:8000" . 2>/dev/null; then
+            echo "⚠️  WARNING: Found localhost:8000 in built files!"
+            echo "This means the API URL replacement didn't work correctly."
+            exit 1
+          else
+            echo "✅ No localhost found - API URL was correctly replaced"
+          fi
+
+          # Check for production URL (should be found)
+          if grep -r "${PROD_URL}" . 2>/dev/null; then
+            echo "✅ Found production API URL (${PROD_URL}) in built files"
+          else
+            echo "⚠️  WARNING: Production API URL not found in built files"
+            echo "Searching for any API URL patterns..."
+            grep -r "https://" . 2>/dev/null | head -5 || echo "No https URLs found"
+          fi
+        continue-on-error: true
+
+      # Step 6: Deploy built files to /public_html
+      # Hostinger FTPS can be flaky — retry up to 5 times with 30s between attempts
+      - name: Deploy website to /public_html
+        uses: Wandalen/wretry.action@v3.5.0
+        with:
+          action: SamKirkland/FTP-Deploy-Action@v4.3.6
+          attempt_limit: 5
+          attempt_delay: 30000
+          with: |
+            server: ${{ secrets.FTP_SERVER_AKOBEN_FRONTEND }}
+            username: ${{ secrets.FTP_USERNAME_AKOBEN_FRONTEND }}
+            password: ${{ secrets.FTP_PASSWORD_AKOBEN_FRONTEND }}
+            protocol: ftps
+            port: ${{ secrets.FTP_PORT_AKOBEN_FRONTEND || 21 }}
+            timeout: 120000
+            local-dir: ./website/dist/client/
+            server-dir: /
+            exclude: |
+              **/.git*
+              **/.git*/**
+              **/.DS_Store
+              **/Thumbs.db
+
+      # Step 7: Deployment summary
+      - name: Deployment summary
+        run: |
+          echo "✅ Website deployment completed successfully!"
+          echo ""
+          echo "🌐 Website files deployed to: /public_html/app/"
+          echo "🔗 API URL configured: ${{ secrets.FRONTEND_API_URL_AKOBEN || 'https://api.akoben.org/api' }}"
+          echo ""
+          echo "⚠️  Important post-deployment steps:"
+          echo "   1. Verify the API URL is correct in the deployed files"
+          echo "   2. Ensure your domain points to /public_html/app/"
+          echo "   3. Check that .htaccess file exists for TanStack Router history mode"
+          echo "   4. Test the application in a browser"
