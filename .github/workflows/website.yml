@@ -51,11 +51,24 @@ jobs:
           VITE_API_URL: ${{ secrets.FRONTEND_API_URL_AKOBEN || 'https://api.akoben.org/api' }}
           # VITE_SCHOOLDOCS_URL: ${{ secrets.FRONTEND_SCHOOLDOCS_URL_TILLY || 'https://schooldocs.kdgsolution.com' }}
 
-      # Step 5: Verify API URL in built files
-      - name: Verify API URL in build
+      # Step 5: Verify build output
+      - name: Verify build output
         run: |
           cd website/dist/client
-          echo "Checking for API URL in built files..."
+          echo "Checking build output..."
+
+          if [ ! -f index.html ]; then
+            echo "ERROR: index.html missing from dist/client — SPA prerender did not run."
+            exit 1
+          fi
+          echo "✅ index.html present"
+
+          if [ ! -f .htaccess ]; then
+            echo "WARNING: .htaccess missing from dist/client"
+          else
+            echo "✅ .htaccess present"
+          fi
+
           PROD_URL="${{ secrets.FRONTEND_API_URL_AKOBEN || 'https://api.akoben.org/api' }}"
 
           # Check for localhost (should NOT be found)
@@ -67,15 +80,13 @@ jobs:
             echo "✅ No localhost found - API URL was correctly replaced"
           fi
 
-          # Check for production URL (should be found)
+          # Check for production URL (should be found when VITE_API_URL is referenced in code)
           if grep -r "${PROD_URL}" . 2>/dev/null; then
             echo "✅ Found production API URL (${PROD_URL}) in built files"
           else
-            echo "⚠️  WARNING: Production API URL not found in built files"
-            echo "Searching for any API URL patterns..."
-            grep -r "https://" . 2>/dev/null | head -5 || echo "No https URLs found"
+            echo "ℹ️  Production API URL not found in static assets (may only be used at runtime)"
           fi
-        continue-on-error: true
+        continue-on-error: false
 
       # Step 6: Deploy built files to /public_html
       # Hostinger FTPS can be flaky — retry up to 5 times with 30s between attempts
@@ -105,11 +116,11 @@ jobs:
         run: |
           echo "✅ Website deployment completed successfully!"
           echo ""
-          echo "🌐 Website files deployed to: /public_html/app/"
+          echo "🌐 Website files deployed to site root (index.html + assets)"
           echo "🔗 API URL configured: ${{ secrets.FRONTEND_API_URL_AKOBEN || 'https://api.akoben.org/api' }}"
           echo ""
           echo "⚠️  Important post-deployment steps:"
-          echo "   1. Verify the API URL is correct in the deployed files"
-          echo "   2. Ensure your domain points to /public_html/app/"
-          echo "   3. Check that .htaccess file exists for TanStack Router history mode"
+          echo "   1. Verify the site loads at your domain"
+          echo "   2. Upload public/audio/level1-module1.mp3 if the sample lesson audio is needed"
+          echo "   3. Confirm .htaccess is active for client-side routing"
           echo "   4. Test the application in a browser"

@@ -11,5 +11,13 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 export default defineConfig({
   tanstackStart: {
     server: { entry: "server" },
+    // Static hosting: prerender a client shell (index.html) for FTPS deploy.
+    spa: {
+      enabled: true,
+      maskPath: "/",
+      prerender: {
+        outputPath: "/index",
+      },
+    },
   },
 });
