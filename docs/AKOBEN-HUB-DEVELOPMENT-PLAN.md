@@ -4,7 +4,7 @@
 **Date:** 27 June 2026  
 **Prepared for:** Akoben client review and build alignment  
 **Repository:** `webapp/website` (React · TanStack Start · Vite)  
-**Production API (configured):** `https://api.akoben.org/api`  
+**Production API (configured):** `https://api.akoben.org/api`  (Proposed url if funding aproved)
 **Deployment:** GitHub Actions → FTPS shared hosting (automated on `main`)
 
 ---
