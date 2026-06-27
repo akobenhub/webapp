@@ -1,11 +1,52 @@
 # Akoben Hub — Development Plan & System Architecture
 
-**Document version:** 1.0  
+**Document version:** 1.1  
 **Date:** 27 June 2026  
 **Prepared for:** Akoben client review and build alignment  
 **Repository:** `webapp/website` (React · TanStack Start · Vite)  
-**Production API (configured):** `https://api.akoben.org/api`  (Proposed url if funding aproved)
+**Production API (configured):** `https://api.akoben.org/api` (proposed URL if funding approved)  
 **Deployment:** GitHub Actions → FTPS shared hosting (automated on `main`)
+
+---
+
+## Immediate milestone — Partner meeting, Monday 29 June 2026
+
+**Context (client update via WhatsApp):** A partner meeting with the organization supplying **Akoben Empowerment Circle resource materials** has been moved to **Monday, 29 June 2026**. The client wants to preview the platform from a **survivor's perspective** and discuss **how partner materials will be organized and made available** on the platform.
+
+**Reference site:** [Saprea Support Groups — Group Materials](https://supportgroups.saprea.org/group-materials/) — client-approved inspiration for structuring educational resources and the survivor learning journey. Akoben does not need to copy Saprea exactly, but should adopt similar clarity and navigation patterns.
+
+### What can be demonstrated today (live site / staging)
+
+| Step | Route | What to show |
+|------|-------|--------------|
+| 1 | `/survivors` | Survivor pathway welcome — trauma-informed tone, anonymous option explained |
+| 2 | `/onboarding/survivor` or `/anonymous-entry` | Gentle entry — identity choice or `AEC-XXXX` Circle ID |
+| 3 | `/circle` | Survivor home dashboard — learning, library, circles, support |
+| 4 | `/healing-library` | Reflection stories (19) — read at own pace |
+| 5 | `/empowerment-circles` | Circle session booking UI |
+| 6 | `/support-request` | Gentle support request flow |
+| 7 | `/referral` | Confidential referral pathway |
+
+### What to describe as "in build" (not yet demo-ready)
+
+| Item | Status | Talking point for partner |
+|------|--------|---------------------------|
+| Full 6-step Orientation Hub | In plan | Replaces WhatsApp; gates access with safety rules + consent |
+| **Group Materials hub** (Saprea-style) | **Not built yet — priority for partner content** | Numbered circle curriculum, leader scripts, meeting-aligned resources |
+| Safeguarding & Risk Check | In plan | Routes distressed users to MHO / 1:1 / crisis pathways |
+| In-app chat (`#group-materials`, circle rooms) | In plan | Controlled, logged group communication |
+| Google Meet — My Circles | In plan | Join meeting from survivor dashboard |
+| Backend persistence | In plan | Progress, assignments, material unlocks sync to server |
+
+### Discussion agenda with resource partner (suggested)
+
+1. **Confirm curriculum shape** — How many circle meetings/sessions? Numbered sequence (like Saprea's 27) or modular topics?
+2. **Per-meeting assets** — Participant guide, facilitator script, grounding exercise, reflection prompts, downloads?
+3. **Leader vs participant views** — What is facilitator-only (scripts, safeguarding notes) vs survivor-visible?
+4. **Join mid-cycle rules** — Can new survivors enter at any meeting? (Saprea allows this with leader guidance.)
+5. **Solo vs group use** — Akoben encourages group circles; clarify what can be browsed alone (Healing Library) vs group-only (meeting scripts).
+6. **File formats** — PDF, audio, video, text-in-app; language versions (English first, Twi/Ga later).
+7. **Naming & numbering** — Agree titles and `#01`–`#NN` convention before build.
 
 ---
 
@@ -17,6 +58,7 @@ This document aligns the **Akoben Digital Healing & Advocacy Hub** with the clie
 - What **must be built** to match the client's specification
 - **Priority order** and rationale for the development route
 - **Content deliverables** required from the client (including Level 1 Module 1 text content)
+- **Partner meeting prep** (29 June 2026) and **Saprea-inspired** Group Materials structure
 
 Use this as the shared reference so the client knows what is in progress, what is next, and why.
 
@@ -59,13 +101,16 @@ Akoben Hub is a **single web application** with **two independent pathways**. Th
 │   / Hybrid)               │   │  AI Circle Assignment           │
 │         ↓                 │   │         ↓                       │
 │  Learning Center          │   │  Internal Chat Rooms            │
-│  (24 modules, 3 levels)   │   │  + Healing Library              │
+│  (24 modules, 3 levels)   │   │  + Group Materials (circle      │
+│         ↓                 │   │    curriculum — Saprea-style)   │
+│  CSA Reporting Module     │   │  + Healing Library (stories)    │
 │         ↓                 │   │  + Google Meet (My Circles)     │
-│  CSA Reporting Module     │   │  + Notifications                │
+│  Akoben Groups + Meet     │   │  + Notifications                │
 │         ↓                 │   │         ↓                       │
-│  Akoben Groups + Meet     │   │  Staff: MHO / Facilitator       │
-│         ↓                 │   │  escalation pathways            │
-│  Admin Dashboard (PCE)    │   │  Admin Dashboard (AEC)          │
+│  Admin Dashboard (PCE)    │   │  Staff: MHO / Facilitator       │
+│                           │   │  escalation pathways            │
+│                           │   │         ↓                       │
+│                           │   │  Admin Dashboard (AEC)          │
 └───────────────────────────┘   └─────────────────────────────────┘
                 │                             │
                 └─────────────┬───────────────┘
@@ -124,7 +169,101 @@ Akoben Hub is a **single web application** with **two independent pathways**. Th
 
 ---
 
-### 4.3 AI-Assisted Circle Assignment (post-orientation)
+### 4.3 Resource Materials & Learning Journey (Saprea reference)
+
+**Client direction:** Organize partner-supplied Empowerment Circle materials using [Saprea's Group Materials page](https://supportgroups.saprea.org/group-materials/) as a structural reference — clear numbering, meeting-aligned topics, facilitator assets, and a guided learning journey.
+
+#### What Saprea does well (patterns to adopt)
+
+| Saprea pattern | How it works | Akoben equivalent (proposed) |
+|----------------|--------------|------------------------------|
+| **Dedicated Group Materials hub** | Single page listing all circle meeting resources | New route: `/group-materials` (survivor-facing) |
+| **Numbered curriculum** | 27 meetings, `#01`–`#27`, each with title + short description | Partner-defined meeting count; same numbering convention |
+| **Meeting-aligned content** | Each card = one group session topic (e.g. "Trauma's Impact on the Brain and Body") | Each card = one Empowerment Circle meeting theme |
+| **Facilitator scripts** | Downloadable script for every group meeting; separate leader resources section | Staff portal + facilitator-only downloads |
+| **Cyclical journey** | After 27 meetings, revisit to deepen; new members can join mid-cycle with leader | Document in UI; circle leader sets "current meeting" for the group |
+| **Group-first messaging** | FAQ: materials work best in a group, not alone | Akoben aligns — solo browsing in Healing Library; curriculum in circles |
+| **Entry guidance** | "Where do I start?" → interest meeting / find a group | Akoben: Orientation Hub → circle assignment → My Circles |
+| **Feedback loop** | Survey link for impact measurement | `/feedback` widget + post-session prompts (future) |
+
+#### Saprea curriculum example (structure only)
+
+Saprea's 27 topics follow a progressive healing arc — brain/body trauma → acknowledgement → shame → mindfulness → coping → boundaries → self-compassion → aspiration. Akoben's partner materials may differ in count and topics, but the **navigation pattern** should match:
+
+```
+Group Materials
+├── Intro panel (purpose + who this is for)
+├── For Circle Leaders (scripts, leader guides) — staff/facilitator only
+└── Meeting materials (#01 … #NN)
+      ├── Title
+      ├── Short description (1–2 sentences)
+      ├── Optional: read in app / download PDF / audio
+      └── Tied to live circle session via Google Meet
+```
+
+#### Akoben: two distinct survivor resource areas
+
+| Area | Purpose | Current status | Partner content? |
+|------|---------|----------------|------------------|
+| **Healing Library** (`/healing-library`) | Narrative stories for private reflection — affirmations, journal prompts | **Built** — 19 stories | No — Akoben-authored |
+| **Group Materials** (`/group-materials` — **to build**) | Numbered circle curriculum for group meetings — psychoeducation, exercises, discussion guides | **Not built** | **Yes — from partner org** |
+| **Chat `#group-materials`** | Announcements + links to new/updated meeting resources | Not built | Complements the hub page |
+
+**Important distinction for the 29 June meeting:** The Healing Library demonstrates *tone and UX* for survivor content. The partner preview should focus on the **planned Group Materials hub** (Saprea-style) where their curriculum will live.
+
+#### Proposed Group Materials page (wireframe)
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Group Materials                                             │
+│  Resources for your Empowerment Circle meetings.             │
+│                                                              │
+│  [For Circle Leaders only → Staff Portal]                    │
+├─────────────────────────────────────────────────────────────┤
+│  Your circle is on Meeting #07 — Understanding Dissociation  │
+│  Next session: Saturday 6 PM  [Join Meeting]               │
+├─────────────────────────────────────────────────────────────┤
+│  #01  Trauma's Impact on the Brain and Body        [Open]   │
+│  #02  Introducing Acknowledgement                   [Open]   │
+│  ...                                                         │
+│  #NN  [Partner topic title]                         [Locked] │
+├─────────────────────────────────────────────────────────────┤
+│  ❓ Where do I start? → Contact your circle leader           │
+│  ❓ Can I use these alone? → Best in group; library for solo │
+│  ❓ Feedback → Share how circles are helping you             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### Content model (for partner + backend)
+
+Each meeting material record:
+
+| Field | Example |
+|-------|---------|
+| `meeting_number` | `7` |
+| `slug` | `understanding-dissociation` |
+| `title` | Understanding Dissociation |
+| `summary` | One of the most common ways a survivor's brain and body tries to protect them… |
+| `participant_content` | In-app text and/or PDF URL |
+| `facilitator_script` | PDF URL (staff-only) |
+| `supplementary_assets` | Audio grounding, worksheets |
+| `language` | `en` (future: `tw`, `ga`) |
+| `unlock_rule` | `after_meeting_N_minus_1` or `leader_unlock` |
+
+#### Build status
+
+| Component | Status |
+|-----------|--------|
+| `/group-materials` route & UI | **Not built** — **elevated priority** (partner meeting 29 Jun) |
+| Numbered meeting cards | Not built |
+| Facilitator script downloads (staff portal) | Partial — staff UI exists, no file hosting |
+| Link meeting # to My Circles / Google Meet | Not built |
+| Partner CMS or admin upload for materials | Not built — needs backend |
+| Healing Library (stories) | **Done** |
+
+---
+
+### 4.4 AI-Assisted Circle Assignment (post-orientation)
 
 After orientation completes, the system asks:
 
@@ -142,7 +281,7 @@ After orientation completes, the system asks:
 
 ---
 
-### 4.4 Internal Chat (replace WhatsApp)
+### 4.5 Internal Chat (replace WhatsApp)
 
 **Client requirement:** Survivor-focused community chat inside the platform (Discord/Slack-style, but safeguarding-controlled).
 
@@ -160,8 +299,8 @@ After orientation completes, the system asks:
 | `#orientation` | Orientation Room | New members |
 | `#general-support` | General Community | All members |
 | `#circle-a` / `#circle-b` / `#circle-c` | Healing Circle Rooms | Assigned circle members |
-| `#healing-library` | Resource Room | All members |
-| `#group-materials` | Group Materials | All members |
+| `#healing-library` | Links to Healing Library (solo reflection stories) | All members |
+| `#group-materials` | Announcements + new meeting resources; links to `/group-materials` hub | All members |
 | Facilitator Room | Staff coordination | Staff only (private) |
 
 #### Communication rules (client-mandated)
@@ -184,7 +323,7 @@ After orientation completes, the system asks:
 
 ---
 
-### 4.5 Notifications (Day One requirement)
+### 4.6 Notifications (Day One requirement)
 
 Users should receive:
 
@@ -201,7 +340,7 @@ Users should receive:
 
 ---
 
-### 4.6 Google Meet Integration
+### 4.7 Google Meet Integration
 
 **Phase 1 (launch):** Keep Google Meet; make it feel native inside Akoben.
 
@@ -218,16 +357,17 @@ Next Meeting: Saturday 6 PM
 
 ---
 
-### 4.7 Other AEC Features
+### 4.8 Other AEC Features
 
 | Feature | Client Phase 1 | Current build status |
 |---------|----------------|----------------------|
 | Registration | Required | UI exists; no API persistence |
 | Anonymous entry | Required | UI + local Circle ID |
 | Orientation Hub | Required | Partial (3 steps, wrong content) |
+| **Group Materials hub** (Saprea-style) | Required for partner content | **Not built — priority** |
 | AI Circle Assignment | Required | Not built |
 | Internal Chat Rooms | Required | Not built |
-| Healing Library | Required | **Done** — 19 stories with affirmations, reflection, journal prompts |
+| Healing Library (stories) | Required | **Done** — 19 stories |
 | Notifications | Required | Not built |
 | Google Meet Integration | Required | Placeholder only |
 | Support request / referral forms | Implied | UI exists; **no backend submission** |
@@ -236,7 +376,14 @@ Next Meeting: Saturday 6 PM
 
 ---
 
-### 4.8 AEC — Build Checklist by Priority
+### 4.9 AEC — Build Checklist by Priority
+
+#### Priority 0 — Partner preview (by 29 June 2026)
+
+- [ ] **Survivor demo path polished** — `/survivors` → entry → `/circle` → `/healing-library` (ready today)
+- [ ] **`/group-materials` page shell** — Saprea-style layout with placeholder cards + partner discussion wireframe
+- [x] **Talking deck / this document section** — explain two resource areas (Healing Library vs Group Materials)
+- [ ] **Confirm meeting count & topic list** with partner — drives numbering and card structure
 
 #### Priority 1 — Launch blockers (AEC)
 
@@ -249,6 +396,7 @@ Next Meeting: Saturday 6 PM
 
 #### Priority 2 — Core AEC experience
 
+- [ ] **Group Materials hub — full build** — numbered meetings, partner uploads, facilitator scripts
 - [ ] **AI Circle Assignment** — availability + language intake → Circle A/B/C
 - [ ] **Internal chat rooms** — with communication rules enforced (no user-to-user DM)
 - [ ] **Message audit logging** — timestamped, admin-accessible
@@ -551,7 +699,8 @@ These items are **complete or substantially complete** in the current frontend:
 - [x] Basic survivor onboarding (3 steps)
 - [x] Anonymous Circle ID generation (`AEC-XXXX`)
 - [x] Circle dashboard (`/circle`)
-- [x] Healing Library — **19 stories** with affirmations, reflection, journal prompts
+- [x] Healing Library — **19 reflection stories** (solo use; separate from Group Materials)
+- [ ] Group Materials hub (`/group-materials`) — **not built** (partner curriculum goes here)
 - [x] Empowerment circle booking UI
 - [x] Support request & referral forms (UI)
 - [x] Consent information page
@@ -605,14 +754,15 @@ The CI pipeline configures `VITE_API_URL=https://api.akoben.org/api`, but **the 
 
 **Goal:** Empowerment Circles feel like a professional survivor platform.
 
-1. AI Circle Assignment (availability + language → Circle A/B/C)
-2. Internal chat rooms with communication rules
-3. Google Meet — "My Circles" with Join Meeting
-4. Notification engine (email + in-app minimum)
-5. MHO urgent support mode
-6. Real circle schedules
+1. **Group Materials hub** — Saprea-style numbered curriculum; partner content ingestion; facilitator script downloads
+2. AI Circle Assignment (availability + language → Circle A/B/C)
+3. Internal chat rooms with communication rules (`#group-materials` links to hub)
+4. Google Meet — "My Circles" with Join Meeting
+5. Notification engine (email + in-app minimum)
+6. MHO urgent support mode
+7. Real circle schedules
 
-**Client can launch:** Soft AEC release with English circles.
+**Client can launch:** Soft AEC release with English circles + partner materials.
 
 ---
 
@@ -647,6 +797,7 @@ The CI pipeline configures `VITE_API_URL=https://api.akoben.org/api`, but **the 
 
 | Order | Rationale |
 |-------|-----------|
+| **Group Materials hub early (Phase 2)** | Partner is supplying curriculum; Saprea-style structure agreed as reference; unlocks content organization before chat/backend scale |
 | **Backend + orientation first** | Without API and orientation gates, users skip safeguarding steps and data is lost |
 | **AEC chat + circles before PCE groups** | Client prioritises replacing WhatsApp with in-app community for survivors |
 | **Module 1 before Modules 2–8** | Docx provides complete spec; validates learning player before scaling content |
@@ -660,6 +811,8 @@ The CI pipeline configures `VITE_API_URL=https://api.akoben.org/api`, but **the 
 
 | Deliverable | Unblocks |
 |-------------|----------|
+| **Empowerment Circle curriculum** (meeting count, titles, summaries, scripts) | Group Materials hub — from resource partner |
+| **Facilitator scripts** per meeting (PDF or docx) | Leader downloads in staff portal |
 | API specification / endpoint documentation | All backend work |
 | Approved final copy for AEC Orientation Hub (Steps 1–6) | AEC onboarding build |
 | Approved final copy for PCE Orientation Hub (7 screens) | PCE onboarding build |
@@ -683,7 +836,8 @@ The CI pipeline configures `VITE_API_URL=https://api.akoben.org/api`, but **the 
 | **AEC Risk check & routing** | 0% | 5-option triage + MHO | **Major build** |
 | **AEC Chat** | 0% | Room-based, audited | **Major build** |
 | **AEC Circle assignment** | 0% | AI-assisted | **Major build** |
-| **Healing Library** | ~95% | Stories + resources | Content expansion only |
+| **Healing Library** | ~95% | Solo reflection stories | Complete; distinct from Group Materials |
+| **Group Materials hub** | 0% | Saprea-style numbered circle curriculum | **Major build — partner content** |
 | **PCE Orientation Hub** | 0% | 7-step + audio | **Major build** |
 | **PCE Module 1 content** | ~10% | Full docx spec | **Major build** |
 | **PCE Learning modes** | 0% | Self / facilitated / hybrid | **Major build** |
@@ -699,6 +853,7 @@ The CI pipeline configures `VITE_API_URL=https://api.akoben.org/api`, but **the 
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.1 | 27 Jun 2026 | Partner meeting milestone (29 Jun); Saprea Group Materials reference; Group Materials hub spec; Healing Library vs curriculum distinction |
 | 1.0 | 27 Jun 2026 | Initial plan from client Pathway 2 spec, Pathway 1 architecture, Module 1 docx, and codebase audit |
 
 ---
